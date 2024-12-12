@@ -1,4 +1,5 @@
 const Project = require("../models/Project");
+const Task = require("../models/Task");
 
 // Lấy danh sách dự án
 const getProjects = async (req, res) => {
@@ -59,10 +60,20 @@ const updateProject = async (req, res) => {
 const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Tìm và xóa dự án
     const deletedProject = await Project.findByIdAndDelete(id);
-    if (!deletedProject)
+    if (!deletedProject) {
       return res.status(404).json({ message: "Project not found" });
-    res.status(200).json({ message: "Project deleted successfully" });
+    }
+
+    // Xóa tất cả task liên quan đến dự án
+    // Update mới đúng logic hơn
+    await Task.deleteMany({ projectId: id });
+
+    res.status(200).json({
+      message: "Project and its tasks deleted successfully",
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
