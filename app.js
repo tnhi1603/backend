@@ -17,8 +17,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/task", taskRoutes);
 app.use("/api/project", projectRoutes);
 
-const PORT = 5001;
-// const PORT = 3001; for mac
+// const PORT = 5001;
+const PORT = 3001; //for mac
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
