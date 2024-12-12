@@ -1,17 +1,18 @@
 const express = require("express");
-const router = express.Router();
 const {
-  createProject,
-  getProjectList,
+  getProjects,
   getProjectById,
+  createProject,
   updateProject,
   deleteProject,
 } = require("../controllers/projectController");
 
-router.get("/", getProjectList);
-router.get("/:id", getProjectById);
-router.post("/", createProject);
-router.put("/:id", updateProject);
-router.delete("/:id", deleteProject);
+const router = express.Router();
+
+router.get("/", getProjects); // Lấy danh sách dự án
+router.get("/:id", getProjectById); // Lấy dự án theo ID
+router.post("/", createProject); // Tạo dự án
+router.put("/:id", updateProject); // Cập nhật dự án
+router.delete("/:id", deleteProject); // Xóa dự án
 
 module.exports = router;

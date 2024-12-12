@@ -1,70 +1,77 @@
-const projectModel = require("../models/Project");
+const Project = require("../models/Project");
 
-const createProject = async (req, res) => {
+// Lấy danh sách dự án
+const getProjects = async (req, res) => {
   try {
-    const project = await projectModel.create(req.body);
-    res.status(200).json(project);
+    const projects = await Project.find({}); // Lấy tất cả dự án
+    res.status(200).json(projects);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
-const getProjectList = async (req, res) => {
-  try {
-    const projectList = await projectModel.find({});
-    res.status(200).send(projectList);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
+// Lấy dự án theo ID
 const getProjectById = async (req, res) => {
   try {
     const { id } = req.params;
-    const project = await projectModel.findById(id);
-    if (project) {
-      res.status(200).send(project);
-    } else {
-      res.status(404).json("No project found!");
-    }
+    const project = await Project.findById(id);
+    if (!project) return res.status(404).json({ message: "Project not found" });
+    res.status(200).json(project);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
+// Tạo dự án mới
+const createProject = async (req, res) => {
+  try {
+    const { name, description, owner, members, startDate, dueDate } = req.body;
+    const newProject = await Project.create({
+      name,
+      description,
+      owner,
+      members,
+      startDate,
+      dueDate,
+    });
+    res.status(201).json(newProject);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Cập nhật dự án
 const updateProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const project = await projectModel.findByIdAndUpdate(id, req.body);
-    if (project) {
-      const updateProject = await projectModel.findById(id);
-      res.status(200).send(updateProject);
-    } else {
-      res.status(404).json("Update fail!");
-    }
+    const updatedProject = await Project.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    if (!updatedProject)
+      return res.status(404).json({ message: "Project not found" });
+    res.status(200).json(updatedProject);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
+// Xóa dự án
 const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const project = await projectModel.findByIdAndDelete(id);
-    if (project) {
-      res.status(200).json("Project deleted successfully!");
-    } else {
-      res.status(404).json("Project not found!");
-    }
+    const deletedProject = await Project.findByIdAndDelete(id);
+    if (!deletedProject)
+      return res.status(404).json({ message: "Project not found" });
+    res.status(200).json({ message: "Project deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 module.exports = {
-  createProject,
-  getProjectList,
+  getProjects,
   getProjectById,
+  createProject,
   updateProject,
   deleteProject,
 };
