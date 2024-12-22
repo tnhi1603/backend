@@ -2,7 +2,24 @@ const taskModel = require("../models/Task");
 
 const getTaskList = async (req, res) => {
   try {
-    const taskList = await taskModel.find({});
+    const taskList = await taskModel.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "assigned_users",
+        },
+      },
+      {
+        $addFields: {
+          assigned_users: {
+            // $first: "$assigned_users",
+            $arrayElemAt: ["$assigned_users", 0],
+          },
+        },
+      },
+    ]);
     res.status(200).send(taskList);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -12,7 +29,33 @@ const getTaskList = async (req, res) => {
 const getTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const task = await taskModel.findById(id);
+    // const task = await taskModel.findById(id);
+    const task = await taskModel
+      .aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(id),
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "idUser",
+            foreignField: "_id",
+            as: "assigned_users",
+          },
+        },
+        {
+          $addFields: {
+            assigned_users: {
+              $arrayElemAt: ["$assigned_users", 0],
+            },
+          },
+        },
+      ])
+      .then(([result]) => {
+        return result;
+      });
     if (!task) {
       res.status(404).json("No task found!");
     }
