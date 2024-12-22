@@ -1,5 +1,8 @@
 const userModel = require("../models/User");
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const getUser = async (req, res) => {
   try {
@@ -72,4 +75,65 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = {getUser, updateUser, deleteUser, changePassword};
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, '../uploads/avatars');
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `${uniqueSuffix}-${file.originalname}`);
+  }
+});
+
+const upload = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only .png, .jpg and .jpeg formats are allowed!'));
+    }
+  }
+});
+
+const changeAvatar = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await userModel.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    // Handle file upload
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+
+    // Delete old avatar file if it exists
+    if (user.avatar) {
+      const oldAvatarPath = path.join(__dirname, '../uploads/avatars', user.avatar);
+      if (fs.existsSync(oldAvatarPath)) {
+        fs.unlinkSync(oldAvatarPath);
+      }
+    }
+
+    // Save the new avatar filename
+    user.avatar = req.file.filename;
+    await user.save();
+
+    res.status(200).json({ message: "Avatar updated successfully.", avatar: user.avatar });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {getUser, updateUser, deleteUser, changePassword, changeAvatar, upload};
