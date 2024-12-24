@@ -1,6 +1,6 @@
 const cron = require("node-cron");
-const Task = require("./models/Task");
-const Notification = require("./models/Notification");
+const Task = require("../models/Task");
+const Notification = require("../models/Notification");
 
 // Hàm xử lý kiểm tra deadlines
 const checkTaskDeadlines = async () => {

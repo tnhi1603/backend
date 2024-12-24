@@ -1,7 +1,8 @@
 const Notification = require("../models/Notification");
 
 // Lấy danh sách thông báo
-const getNotifications = async (req, res) => {
+// Phần này anh đã đổi tên từ getNotifications thành getAllNotifications
+const getAllNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find()
       .populate("userId", "name") // Lấy thông tin tên và email người tạo thông báo
@@ -14,6 +15,44 @@ const getNotifications = async (req, res) => {
   }
 };
 
+const getNotificationsByUser = async (req, res) => {
+  try {
+    // Lấy userId từ query parameters
+    const userId = req.query.userId;
+    console.log("Received userId:", userId);
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId is required",
+      });
+    }
+
+    // Lấy thông báo liên quan đến user
+    const limit = parseInt(req.query.limit) || 10; // Giới hạn số lượng trả về
+    const isReadFilter = req.query.isRead === "false" ? false : undefined; // Lọc trạng thái đọc
+
+    const notifications = await Notification.find({
+      userId: userId, // Chỉ thông báo của user được chỉ định
+      //   deletedBy: null, // Không bị xóa
+      //   isRead: isReadFilter, // Lọc trạng thái đọc (nếu có)
+    })
+      .populate("taskId", "title dueDate") // Lấy thông tin nhiệm vụ (nếu có)
+      .sort({ createdAt: -1 }) // Sắp xếp theo thời gian gần nhất
+      .limit(limit); // Giới hạn số lượng trả về
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching notifications",
+      error: error.message,
+    });
+  }
+};
 // Cập nhật nội dung thông báo
 const updateNotification = async (req, res) => {
   try {
@@ -55,12 +94,10 @@ const markNotificationAsRead = async (req, res) => {
 
     res.json({ message: "Notification marked as read", notification });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        message: "Error marking notification as read",
-        error: err.message,
-      });
+    res.status(500).json({
+      message: "Error marking notification as read",
+      error: err.message,
+    });
   }
 };
 
@@ -78,11 +115,9 @@ const deleteNotification = async (req, res) => {
 
     // Chỉ cho phép người tạo thông báo xóa nó
     if (notification.userId.toString() !== userId) {
-      return res
-        .status(403)
-        .json({
-          message: "You are not authorized to delete this notification",
-        });
+      return res.status(403).json({
+        message: "You are not authorized to delete this notification",
+      });
     }
 
     await Notification.findByIdAndDelete(id);
@@ -108,18 +143,17 @@ const createNotification = async (req, res) => {
 
     res.status(201).json({ success: true, notification: newNotification });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error creating notification",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error creating notification",
+      error: error.message,
+    });
   }
 };
 
 module.exports = {
-  getNotifications,
+  getAllNotifications,
+  getNotificationsByUser,
   updateNotification,
   markNotificationAsRead,
   deleteNotification,

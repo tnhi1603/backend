@@ -8,7 +8,7 @@ const taskRoutes = require("./routes/taskRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const userRoutes = require("./routes/userRoutes");
 const notiRoutes = require("./routes/notiRoutes");
-const checkTaskDeadlines = require("./jobs/cronJobs");
+const checkTaskDeadlines = require("./cron/cronJobs");
 
 const app = express();
 
