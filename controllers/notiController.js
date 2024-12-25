@@ -77,6 +77,54 @@ const updateNotification = async (req, res) => {
   }
 };
 
+// Đánh dấu nhiều thông báo đã đọc
+const markMultipleNotificationsAsRead = async (req, res) => {
+  try {
+    const { ids } = req.body; // Lấy danh sách ID của các thông báo cần đánh dấu đã đọc
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: "Invalid or empty IDs array" });
+    }
+
+    const notifications = await Notification.updateMany(
+      { _id: { $in: ids } },
+      { $set: { isRead: true } },
+      { new: true }
+    );
+
+    res.json({ message: "Notifications marked as read", notifications });
+  } catch (err) {
+    res.status(500).json({
+      message: "Error marking notifications as read",
+      error: err.message,
+    });
+  }
+};
+
+// Đánh dấu thông báo là chưa đọc
+const markNotificationAsUnread = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const notification = await Notification.findByIdAndUpdate(
+      id,
+      { isRead: false },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    res.json({ message: "Notification marked as unread", notification });
+  } catch (err) {
+    res.status(500).json({
+      message: "Error marking notification as unread",
+      error: err.message,
+    });
+  }
+};
+
 // Đánh dấu thông báo là đã đọc
 const markNotificationAsRead = async (req, res) => {
   try {
@@ -156,5 +204,8 @@ module.exports = {
   getNotificationsByUser,
   updateNotification,
   markNotificationAsRead,
+  markNotificationAsUnread,
+  markMultipleNotificationsAsRead,
   deleteNotification,
+  createNotification,
 };

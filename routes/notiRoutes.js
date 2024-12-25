@@ -5,6 +5,9 @@ const {
   getNotificationsByUser,
   updateNotification,
   markNotificationAsRead,
+  markNotificationAsUnread,
+  markMultipleNotificationsAsRead,
+  createNotification,
   deleteNotification,
 } = require("../controllers/notiController");
 
@@ -19,6 +22,15 @@ router.put("/:id", updateNotification);
 
 // Đánh dấu thông báo là đã đọc
 router.patch("/:id/read", markNotificationAsRead);
+
+// Đánh dấu thông báo là chưa đọc
+router.patch("/:id/unread", markNotificationAsUnread);
+
+// Đánh dấu nhiều thông báo là đã đọc
+router.patch("/multiple/read", markMultipleNotificationsAsRead);
+
+// Tạo thông báo mới
+router.post("/", createNotification);
 
 // Xóa thông báo
 router.delete("/:id", deleteNotification);
