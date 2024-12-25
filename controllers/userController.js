@@ -1,5 +1,5 @@
 const userModel = require("../models/User");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
 const getUser = async (req, res) => {
   try {
@@ -47,7 +47,9 @@ const changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Old and new passwords are required." });
+      return res
+        .status(400)
+        .json({ message: "Old and new passwords are required." });
     }
 
     const user = await userModel.findById(id);
@@ -72,4 +74,4 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = {getUser, updateUser, deleteUser, changePassword};
+module.exports = { getUser, updateUser, deleteUser, changePassword };
