@@ -50,7 +50,9 @@ const changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Old and new passwords are required." });
+      return res
+        .status(400)
+        .json({ message: "Old and new passwords are required." });
     }
 
     const user = await userModel.findById(id);

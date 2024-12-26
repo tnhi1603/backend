@@ -1,23 +1,38 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
-    getNotifications,
-    updateNotification,
-    markNotificationAsRead,
-    deleteNotification,
-} = require('../controllers/notiController');
+  getAllNotifications,
+  getNotificationsByUser,
+  updateNotification,
+  markNotificationAsRead,
+  markNotificationAsUnread,
+  markMultipleNotificationsAsRead,
+  createNotification,
+  deleteNotification,
+} = require("../controllers/notiController");
 
-const checkUserId = require('../middlewares/checkUserId');
+const checkUserId = require("../middlewares/checkUserId");
 // Lấy danh sách thông báo
-router.get('/', getNotifications);
+router.get("/", getAllNotifications);
+
+router.get("/by-user", getNotificationsByUser);
 
 // Chỉnh sửa thông báo
-router.put('/:id', updateNotification);
+router.put("/:id", updateNotification);
 
 // Đánh dấu thông báo là đã đọc
-router.patch('/:id/read', markNotificationAsRead);
+router.patch("/:id/read", markNotificationAsRead);
+
+// Đánh dấu thông báo là chưa đọc
+router.patch("/:id/unread", markNotificationAsUnread);
+
+// Đánh dấu nhiều thông báo là đã đọc
+router.patch("/multiple/read", markMultipleNotificationsAsRead);
+
+// Tạo thông báo mới
+router.post("/", createNotification);
 
 // Xóa thông báo
-router.delete('/:id', deleteNotification);
+router.delete("/:id", deleteNotification);
 
 module.exports = router;
