@@ -1,4 +1,5 @@
 const taskModel = require("../models/Task");
+const projectModel = require("../models/Project");
 
 const getTaskList = async (req, res) => {
   try {
@@ -65,6 +66,140 @@ const getTask = async (req, res) => {
   }
 };
 
+// http://localhost:5000/api/task/sort?value=1
+const getTaskListByPrioritySort = async (req, res) => {
+  try {
+    const { value } = req.query;
+    console.log(typeof value);
+    const task = await taskModel.aggregate([
+      {
+        $sort: { priority: Number(value) },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "assigned_users",
+        },
+      },
+      {
+        $addFields: {
+          assigned_users: {
+            $arrayElemAt: ["$assigned_users", 0],
+          },
+        },
+      },
+    ]);
+    if (!task) {
+      res.status(403).json("Something wrong!");
+    }
+    res.status(200).send(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getTaskListByStatusSort = async (req, res) => {
+  try {
+    const { value } = req.query;
+    console.log(typeof value);
+    const task = await taskModel.aggregate([
+      {
+        $sort: { status: Number(value) },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "assigned_users",
+        },
+      },
+      {
+        $addFields: {
+          assigned_users: {
+            $arrayElemAt: ["$assigned_users", 0],
+          },
+        },
+      },
+    ]);
+    if (!task) {
+      res.status(403).json("Something wrong!");
+    }
+    res.status(200).send(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// http://localhost:5000/api/task/filter?value=High
+const getTaskListByPriorityFilter = async (req, res) => {
+  try {
+    const { value } = req.query;
+    // const task = await taskModel.where(field).equals(value);
+    const task = await taskModel.aggregate([
+      {
+        $match: { priority: `${value}` },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "assigned_users",
+        },
+      },
+      {
+        $addFields: {
+          assigned_users: {
+            $arrayElemAt: ["$assigned_users", 0],
+          },
+        },
+      },
+    ]);
+    if (!task) {
+      res.status(403).json("Something wrong!");
+    }
+    res.status(200).send(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getTaskListByStatusFilter = async (req, res) => {
+  try {
+    const { value } = req.query;
+    // const task = await taskModel.where(field).equals(value);
+    const task = await taskModel.aggregate([
+      {
+        $match: { status: `${value}` },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "assigned_users",
+        },
+      },
+      {
+        $addFields: {
+          assigned_users: {
+            $arrayElemAt: ["$assigned_users", 0],
+          },
+        },
+      },
+    ]);
+    if (!task) {
+      res.status(403).json("Something wrong!");
+    }
+    res.status(200).send(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const createTask = async (req, res) => {
   try {
     const task = await taskModel.create(req.body);
@@ -101,10 +236,100 @@ const deleteTask = async (req, res) => {
   }
 };
 
+// input pattern-matching with title or description
+const getTaskByUserInput = async (value) => {
+  const task = await taskModel.aggregate([
+    {
+      $match: {
+        $or: [{ title: { $regex: value } }, { description: { $regex: value } }],
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "idUser",
+        foreignField: "_id",
+        as: "assigned_users",
+      },
+    },
+    {
+      $addFields: {
+        assigned_users: {
+          // $first: "$assigned_users",
+          $arrayElemAt: ["$assigned_users", 0],
+        },
+      },
+    },
+  ]);
+  return task;
+};
+
+// input pattern-matching with name or description
+const getProjectByUserInput = async (value) => {
+  const project = await projectModel.aggregate([
+    {
+      $match: {
+        $or: [{ name: { $regex: value } }, { description: { $regex: value } }],
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner_users",
+      },
+      $lookup: {
+        from: "users",
+        localField: "members",
+        foreignField: "_id",
+        as: "member_users",
+      },
+    },
+    {
+      $addFields: {
+        owner_users: {
+          // $first: "$assigned_users",
+          $arrayElemAt: ["$owner_users", 0],
+        },
+      },
+      $addFields: {
+        member_users: {
+          // $first: "$assigned_users",
+          $arrayElemAt: ["$member_users", 0],
+        },
+      },
+    },
+  ]);
+  return project;
+};
+
+// find by user input
+// http://localhost:5000/api/task/find?value=Project Alpha
+const findByUserInput = async (req, res) => {
+  try {
+    const { value } = req.query;
+    const task = await getTaskByUserInput(value);
+    const project = await getProjectByUserInput(value);
+    const result = {
+      tasks: task,
+      projects: project,
+    };
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getTaskList,
   getTask,
   updateTask,
   deleteTask,
   createTask,
+  getTaskListByPrioritySort,
+  getTaskListByStatusSort,
+  getTaskListByPriorityFilter,
+  getTaskListByStatusFilter,
+  findByUserInput,
 };
