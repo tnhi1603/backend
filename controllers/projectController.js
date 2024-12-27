@@ -11,15 +11,21 @@ const getProjects = async (req, res) => {
   }
 };
 
-// Lấy dự án theo ID
+// Lấy dự án theo UserID
 const getProjectById = async (req, res) => {
   try {
     const { id } = req.params;
-    const project = await Project.findById(id);
-    if (!project) return res.status(404).json({ message: "Project not found" });
-    res.status(200).json(project);
+
+    const project = await Project.find({
+      $or: [{ owner: id }, { members: id }],
+    });
+
+    if (project.length === 0) {
+      return res.status(404).json("No project found!");
+    }
+    return res.status(200).send(project);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
