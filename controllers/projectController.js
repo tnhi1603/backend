@@ -11,13 +11,17 @@ const getProjects = async (req, res) => {
   }
 };
 
-// Lấy dự án theo ID
+// Lấy dự án theo ID và thông tin owner, members
 const getProjectById = async (req, res) => {
   try {
     const { id } = req.params;
-    const project = await Project.findById(id);
+    const project = await Project.findById(id)
+      .populate("owner", "name avatar") // Lấy thông tin của owner (name, avatar)
+      .populate("members", "name avatar"); // Lấy thông tin của các members (name, avatar)
+
     if (!project) return res.status(404).json({ message: "Project not found" });
-    res.status(200).json(project);
+
+    res.status(200).json(project); // Trả về thông tin dự án, bao gồm owner và members
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

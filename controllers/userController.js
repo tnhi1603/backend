@@ -1,5 +1,5 @@
 const userModel = require("../models/User");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
 const getUser = async (req, res) => {
   try {
@@ -11,6 +11,16 @@ const getUser = async (req, res) => {
     res.status(200).send(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// L?y danh sách user
+const getAllUser = async (req, res) => {
+  try {
+    const projects = await userModel.find({}); // L?y t?t c? d? án
+    res.status(200).json(projects);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -47,7 +57,9 @@ const changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Old and new passwords are required." });
+      return res
+        .status(400)
+        .json({ message: "Old and new passwords are required." });
     }
 
     const user = await userModel.findById(id);
@@ -72,4 +84,10 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = {getUser, updateUser, deleteUser, changePassword};
+module.exports = {
+  getUser,
+  getAllUser,
+  updateUser,
+  deleteUser,
+  changePassword,
+};
