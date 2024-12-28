@@ -11,6 +11,7 @@ const {
   getTaskListByPriorityFilter,
   getTaskListByStatusFilter,
   findByUserInput,
+  getTaskListByUser,
 } = require("../controllers/taskController");
 
 router.get("/", getTaskList);
@@ -23,5 +24,6 @@ router.get("/:id", getTask);
 router.post("/", createTask);
 router.put("/:id", updateTask);
 router.delete("/:id", deleteTask);
+router.get("/user/:id", getTaskListByUser);
 
 module.exports = router;

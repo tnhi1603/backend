@@ -5,7 +5,7 @@ const NotificationSchema = new mongoose.Schema({
   taskId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Task",
-    required: false,
+    // required: false,
   }, // Liên kết tới nhiệm vụ
   content: { type: String, required: true },
   isRead: { type: Boolean, default: false },

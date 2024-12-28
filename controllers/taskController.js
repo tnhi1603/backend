@@ -321,6 +321,41 @@ const findByUserInput = async (req, res) => {
   }
 };
 
+const getTaskListByUser = async (req, res) => {
+  try {
+    const { userId } = req.params; // Lấy userId từ request params
+    const taskList = await taskModel.aggregate([
+      {
+        $match: { idUser: new mongoose.Types.ObjectId(userId) }, // Lọc các task thuộc user
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "assigned_users",
+        },
+      },
+      {
+        $addFields: {
+          assigned_users: {
+            $arrayElemAt: ["$assigned_users", 0], // Lấy user đầu tiên từ danh sách assigned_users
+          },
+        },
+      },
+    ]);
+
+    if (!taskList || taskList.length === 0) {
+      return res.status(404).json({ message: "No tasks found for this user." });
+    }
+
+    res.status(200).json(taskList);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
   getTaskList,
   getTask,
@@ -332,4 +367,5 @@ module.exports = {
   getTaskListByPriorityFilter,
   getTaskListByStatusFilter,
   findByUserInput,
+  getTaskListByUser,
 };
