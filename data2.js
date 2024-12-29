@@ -90,7 +90,7 @@ const seedData = async () => {
         title: "Create project schema",
         description: "Define schema for Bob's Project",
         priority: "Medium",
-        status: "Not Started",
+        status: "In Progress",
         project: projects[1]._id,
         startDate: new Date("2024-02-20"),
         dueDate: new Date("2024-03-15"),
