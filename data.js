@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 
 // Import các models
@@ -33,40 +32,45 @@ const seedData = async () => {
 
     console.log("Old data cleared.");
 
-    // Tạo Users
-    const hashedPassword = await bcrypt.hash("123456", 10);
+    // Thêm Users
     const users = await User.insertMany([
       {
-        name: "James",
-        email: "james@e.com",
-        password: hashedPassword,
+        name: "Alice",
+        email: "alice@example.com",
+        password: "123456",
         avatar: "https://via.placeholder.com/150",
       },
       {
         name: "Bob",
-        email: "bob@e.com",
-        password: hashedPassword,
+        email: "bob@example.com",
+        password: "123456",
+        avatar: "https://via.placeholder.com/150",
+      },
+      {
+        name: "Charlie",
+        email: "charlie@example.com",
+        password: "123456",
         avatar: "https://via.placeholder.com/150",
       },
     ]);
 
-    console.log("2 Users added.");
+    console.log("3 Users added.");
 
-    // Tạo Projects
+    // Thêm Projects
     const projects = await Project.insertMany([
       {
-        name: "James' Project",
-        description: "This is a project managed by James",
+        name: "Project Alpha",
+        description: "This is the first project",
         owner: users[0]._id,
-        members: [users[0]._id, users[1]._id], // Bob là thành viên
+        members: [users[1]._id, users[2]._id],
         startDate: new Date("2024-01-01"),
         dueDate: new Date("2024-06-01"),
       },
       {
-        name: "Bob's Project",
-        description: "This is a project managed by Bob",
+        name: "Project Beta",
+        description: "This is the second project",
         owner: users[1]._id,
-        members: [users[1]._id, users[0]._id], // James là thành viên
+        members: [users[0]._id],
         startDate: new Date("2024-02-01"),
         dueDate: new Date("2024-07-01"),
       },
@@ -74,59 +78,84 @@ const seedData = async () => {
 
     console.log("2 Projects added.");
 
-    // Tạo Tasks
+    // Thêm Tasks
     const tasks = await Task.insertMany([
       {
-        title: "Set up Git repository",
-        description: "Initialize Git for James' Project",
+        title: "Task 1",
+        description: "Task for Project Alpha",
         priority: "High",
         status: "In Progress",
+        dueDate: new Date("2024-03-01"),
         project: projects[0]._id,
-        startDate: new Date("2024-01-15"),
-        dueDate: new Date("2024-02-15"),
-        idUser: users[0]._id,
+        startDate: new Date("2024-01-10"),
+        idUser: users[1]._id,
       },
       {
-        title: "Create project schema",
-        description: "Define schema for Bob's Project",
+        title: "Task 2",
+        description: "Task for Project Beta",
         priority: "Medium",
-        status: "Not Started",
+        status: "Completed",
+        dueDate: new Date("2024-04-01"),
         project: projects[1]._id,
+        startDate: new Date("2024-02-15"),
+        idUser: users[0]._id,
+      },
+      //   James thêm task mới test thông báo
+      {
+        title: "Prepare presentation slides",
+        description: "Presentation for Project Alpha",
+        priority: "Medium",
+        status: "In Progress",
+        dueDate: new Date(new Date().setDate(new Date().getDate() + 1)), // Còn 1 ngày
+        project: projects[0]._id,
         startDate: new Date("2024-02-20"),
-        dueDate: new Date("2024-03-15"),
         idUser: users[1]._id,
+      },
+      {
+        title: "Fix critical bugs",
+        description: "Urgent bug fixes for Project Beta",
+        priority: "High",
+        status: "In Progress",
+        dueDate: new Date(new Date().setDate(new Date().getDate() - 2)), // Đã trễ 2 ngày
+        project: projects[1]._id,
+        startDate: new Date("2024-02-15"),
+        idUser: users[0]._id,
       },
     ]);
 
     console.log("Tasks added.");
 
-    // Tạo Notifications
+    // Thêm Notifications
     const notifications = await Notification.insertMany([
       {
         userId: users[0]._id,
-        content: "You have been assigned a task in Bob's Project",
+        content: "Your task has been updated",
         isRead: false,
+        createdAt: new Date(),
       },
       {
         userId: users[1]._id,
-        content: "You have been added to James' Project",
+        content: "New member joined your project",
         isRead: true,
+        createdAt: new Date(),
       },
     ]);
 
     console.log("Notifications added.");
 
-    // Tạo Attachments
+    // Thêm Attachments
     const attachments = await Attachment.insertMany([
       {
         taskId: tasks[0]._id,
         fileUrl: "https://example.com/file1.pdf",
-        uploadedBy: users[0]._id,
+        uploadedBy: users[1]._id,
+        createdAt: new Date(),
       },
       {
         taskId: tasks[1]._id,
         fileUrl: "https://example.com/file2.docx",
-        uploadedBy: users[1]._id,
+        uploadedBy: users[0]._id,
+        createdAt: new Date(),
       },
     ]);
 
@@ -134,7 +163,7 @@ const seedData = async () => {
     console.log("Seeding completed.");
     process.exit();
   } catch (err) {
-    console.error("Error during seeding:", err);
+    console.error(err);
     process.exit(1);
   }
 };
