@@ -4,6 +4,7 @@ const projectModel = require("../models/Project");
 const getTaskList = async (req, res) => {
   try {
     const taskList = await taskModel.aggregate([
+      // Lookup từ "users" để lấy thông tin assigned_users
       {
         $lookup: {
           from: "users",
@@ -15,12 +16,34 @@ const getTaskList = async (req, res) => {
       {
         $addFields: {
           assigned_users: {
-            // $first: "$assigned_users",
-            $arrayElemAt: ["$assigned_users", 0],
+            $arrayElemAt: ["$assigned_users", 0], // Lấy phần tử đầu tiên của mảng
           },
         },
       },
+      // Lookup từ "projects" để lấy thông tin project name
+      {
+        $lookup: {
+          from: "projects", // Tên collection projects
+          localField: "project", // Trường project trong taskModel
+          foreignField: "_id", // Trường _id trong collection projects
+          as: "project_details",
+        },
+      },
+      {
+        $addFields: {
+          project_name: {
+            $arrayElemAt: ["$project_details.name", 0], // Lấy field "name" từ project_details
+          },
+        },
+      },
+      // Loại bỏ trường không cần thiết (nếu cần)
+      {
+        $project: {
+          project_details: 0, // Ẩn toàn bộ project_details
+        },
+      },
     ]);
+
     res.status(200).send(taskList);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -66,7 +89,7 @@ const getTask = async (req, res) => {
   }
 };
 
-// http://localhost:5000/api/task/sort?value=1
+// http://localhost:5001/api/task/sort?value=1
 const getTaskListByPrioritySort = async (req, res) => {
   try {
     const { value } = req.query;
@@ -133,7 +156,7 @@ const getTaskListByStatusSort = async (req, res) => {
   }
 };
 
-// http://localhost:5000/api/task/filter?value=High
+// http://localhost:5001/api/task/filter?value=High
 const getTaskListByPriorityFilter = async (req, res) => {
   try {
     const { value } = req.query;
@@ -305,7 +328,7 @@ const getProjectByUserInput = async (value) => {
 };
 
 // find by user input
-// http://localhost:5000/api/task/find?value=Project Alpha
+// http://localhost:5001/api/task/find?value=Project Alpha
 const findByUserInput = async (req, res) => {
   try {
     const { value } = req.query;
@@ -354,7 +377,6 @@ const getTaskListByUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 module.exports = {
   getTaskList,
