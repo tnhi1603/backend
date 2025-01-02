@@ -10,7 +10,7 @@ const {
 const router = express.Router();
 
 router.get("/", getProjects); // Lấy danh sách dự án
-router.get("/user/:id", getProjectByUserId); // Lấy dự án theo UserID
+router.get("/user/:userId", getProjectByUserId); // Lấy dự án theo UserID
 router.post("/", createProject); // Tạo dự án
 router.put("/:id", updateProject); // Cập nhật dự án
 router.delete("/:id", deleteProject); // Xóa dự án

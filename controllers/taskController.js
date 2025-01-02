@@ -372,11 +372,11 @@ const findByUserInput = async (req, res) => {
 
 const getTaskListByUser = async (req, res) => {
   try {
-    const { id } = req.params; // Lấy userId từ tham số URL
+    const { userId } = req.params; // Lấy userId từ tham số URL
 
     const tasks = await taskModel.aggregate([
       {
-        $match: { idUser: new mongoose.Types.ObjectId(id) },
+        $match: { idUser: new mongoose.Types.ObjectId(userId) },
       },
       {
         $lookup: {
@@ -424,11 +424,9 @@ const getTaskListByUser = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   getTaskList,
-  getTask,
+  getTask,m
   updateTask,
   deleteTask,
   createTask,
