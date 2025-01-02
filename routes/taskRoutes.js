@@ -12,6 +12,7 @@ const {
   getTaskListByStatusFilter,
   findByUserInput,
   getTaskListByUser,
+  updateTaskStatus,
 } = require("../controllers/taskController");
 
 router.get("/", getTaskList);
@@ -25,5 +26,6 @@ router.post("/", createTask);
 router.put("/:id", updateTask);
 router.delete("/:id", deleteTask);
 router.get("/user/:userId", getTaskListByUser);
+router.patch("/:id/status", updateTaskStatus); // Cập nhật trạng thái task
 
 module.exports = router;
