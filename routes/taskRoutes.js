@@ -24,6 +24,6 @@ router.get("/:id", getTask);
 router.post("/", createTask);
 router.put("/:id", updateTask);
 router.delete("/:id", deleteTask);
-router.get("/user/:id", getTaskListByUser);
+router.get("/user/:userId", getTaskListByUser);
 
 module.exports = router;
