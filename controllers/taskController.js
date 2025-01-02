@@ -54,37 +54,62 @@ const getTaskList = async (req, res) => {
 const getTask = async (req, res) => {
   try {
     const { id } = req.params;
-    // const task = await taskModel.findById(id);
-    const task = await taskModel
-      .aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(id),
+
+    const task = await taskModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "idUser",
+          foreignField: "_id",
+          as: "assigned_users",
+        },
+      },
+      {
+        $unwind: "$assigned_users",
+      },
+      {
+        $lookup: {
+          from: "projects",
+          localField: "project",
+          foreignField: "_id",
+          as: "project_details",
+        },
+      },
+      {
+        $unwind: "$project_details",
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "project_details.owner",
+          foreignField: "_id",
+          as: "project_owner",
+        },
+      },
+      {
+        $unwind: "$project_owner",
+      },
+      {
+        $addFields: {
+          project_owner: {
+            _id: "$project_owner._id",
+            name: "$project_owner.name",
+            email: "$project_owner.email",
           },
         },
-        {
-          $lookup: {
-            from: "users",
-            localField: "idUser",
-            foreignField: "_id",
-            as: "assigned_users",
-          },
-        },
-        {
-          $addFields: {
-            assigned_users: {
-              $arrayElemAt: ["$assigned_users", 0],
-            },
-          },
-        },
-      ])
-      .then(([result]) => {
-        return result;
-      });
-    if (!task) {
-      res.status(404).json("No task found!");
+      },
+    ]);
+
+    if (!task || task.length === 0) {
+      return res.status(404).json({ message: "Task not found!" });
     }
-    res.status(200).send(task);
+
+    res.status(200).json(task[0]);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -347,24 +372,56 @@ const findByUserInput = async (req, res) => {
 
 const getTaskListByUser = async (req, res) => {
   try {
-      const { userId } = req.params; // Lấy userId từ tham số URL
-      const tasks = await taskModel.find({
-        $or: [{ owner: userId }, { members: userId }],
-      }).populate("owner", "name email") // Populate để lấy thông tin chi tiết của owner
-        .populate("members", "name email"); // Populate để lấy thông tin chi tiết của các members
-  
-      // Kiểm tra nếu không có dự án nào được tìm thấy
-      if (!tasks || tasks.length === 0) {
-        return res.status(404).json({ message: "No tasks found for this user." });
-      }
-  
-      // Trả về danh sách dự án
-      return res.status(200).json(tasks);
-    } catch (error) {
-      // Xử lý lỗi và trả về thông báo lỗi
-      console.error("Error fetching tasks by userId:", error);
-      return res.status(500).json({ message: "Failed to fetch task. Please try again later." });
+    const { id } = req.params; // Lấy userId từ tham số URL
+
+    const tasks = await taskModel.aggregate([
+      {
+        $match: { idUser: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "projects",
+          localField: "project",
+          foreignField: "_id",
+          as: "project_details",
+        },
+      },
+      {
+        $unwind: "$project_details",
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "project_details.owner",
+          foreignField: "_id",
+          as: "project_owner",
+        },
+      },
+      {
+        $unwind: "$project_owner",
+      },
+      {
+        $addFields: {
+          project_owner: {
+            _id: "$project_owner._id",
+            name: "$project_owner.name",
+            email: "$project_owner.email",
+          },
+        },
+      },
+    ]);
+
+    if (!tasks || tasks.length === 0) {
+      return res.status(404).json({ message: "No tasks found for this user." });
     }
+
+    return res.status(200).json(tasks);
+  } catch (error) {
+    console.error("Error fetching tasks by userId:", error);
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch tasks. Please try again later." });
+  }
 };
 
 
