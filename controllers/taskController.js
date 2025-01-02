@@ -1,6 +1,7 @@
+const mongoose = require("mongoose");
 const taskModel = require("../models/Task");
 const projectModel = require("../models/Project");
-const mongoose = require("mongoose");
+const Notification = require("../models/Notification");
 
 const getTaskList = async (req, res) => {
   try {
@@ -424,6 +425,45 @@ const getTaskListByUser = async (req, res) => {
   }
 };
 
+// Cập nhật trạng thái task
+const updateTaskStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Tìm và cập nhật task
+    const task = await taskModel
+      .findByIdAndUpdate(id, { status }, { new: true })
+      .populate("project", "owner members");
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    // Gửi thông báo tới owner và các thành viên được giao task
+    const ownerId = task.project.owner;
+    const memberIds = task.project.members;
+
+    const recipients = [
+      ownerId.toString(),
+      ...memberIds.map((id) => id.toString()),
+    ];
+
+    const notifications = recipients.map((userId) => ({
+      userId: userId,
+      content: `Task "${task.title}" đã được cập nhật trạng thái thành "${status}".`,
+      task: task._id,
+    }));
+
+    await Notification.insertMany(notifications);
+
+    res.status(200).json(task);
+  } catch (error) {
+    console.error("Error updating task status:", error);
+    res.status(500).json({ message: "Failed to update task status." });
+  }
+};
+
 module.exports = {
   getTaskList,
   getTask,
@@ -436,4 +476,5 @@ module.exports = {
   getTaskListByStatusFilter,
   findByUserInput,
   getTaskListByUser,
+  updateTaskStatus,
 };
