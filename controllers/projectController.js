@@ -12,22 +12,31 @@ const getProjects = async (req, res) => {
 };
 
 // Lấy dự án theo UserID
-const getProjectById = async (req, res) => {
+// Lấy thông tin dự án theo userId
+const getProjectByUserId = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userId } = req.params; // Lấy userId từ tham số URL
 
-    const project = await Project.find({
-      $or: [{ owner: id }, { members: id }],
-    });
+    // Tìm kiếm dự án nơi userId là owner hoặc thuộc danh sách members
+    const projects = await Project.find({
+      $or: [{ owner: userId }, { members: userId }],
+    }).populate("owner", "name email") // Populate để lấy thông tin chi tiết của owner
+      .populate("members", "name email"); // Populate để lấy thông tin chi tiết của các members
 
-    if (project.length === 0) {
-      return res.status(404).json("No project found!");
+    // Kiểm tra nếu không có dự án nào được tìm thấy
+    if (!projects || projects.length === 0) {
+      return res.status(404).json({ message: "No projects found for this user." });
     }
-    return res.status(200).send(project);
+
+    // Trả về danh sách dự án
+    return res.status(200).json(projects);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    // Xử lý lỗi và trả về thông báo lỗi
+    console.error("Error fetching projects by userId:", error);
+    return res.status(500).json({ message: "Failed to fetch projects. Please try again later." });
   }
 };
+
 
 // Tạo dự án mới
 const createProject = async (req, res) => {
@@ -87,7 +96,7 @@ const deleteProject = async (req, res) => {
 
 module.exports = {
   getProjects,
-  getProjectById,
+  getProjectByUserId,
   createProject,
   updateProject,
   deleteProject,

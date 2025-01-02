@@ -1,5 +1,6 @@
 const taskModel = require("../models/Task");
 const projectModel = require("../models/Project");
+const mongoose = require("mongoose");
 
 const getTaskList = async (req, res) => {
   try {
@@ -346,37 +347,27 @@ const findByUserInput = async (req, res) => {
 
 const getTaskListByUser = async (req, res) => {
   try {
-    const { userId } = req.params; // Lấy userId từ request params
-    const taskList = await taskModel.aggregate([
-      {
-        $match: { idUser: new mongoose.Types.ObjectId(userId) }, // Lọc các task thuộc user
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "idUser",
-          foreignField: "_id",
-          as: "assigned_users",
-        },
-      },
-      {
-        $addFields: {
-          assigned_users: {
-            $arrayElemAt: ["$assigned_users", 0], // Lấy user đầu tiên từ danh sách assigned_users
-          },
-        },
-      },
-    ]);
-
-    if (!taskList || taskList.length === 0) {
-      return res.status(404).json({ message: "No tasks found for this user." });
+      const { userId } = req.params; // Lấy userId từ tham số URL
+      const tasks = await taskModel.find({
+        $or: [{ owner: userId }, { members: userId }],
+      }).populate("owner", "name email") // Populate để lấy thông tin chi tiết của owner
+        .populate("members", "name email"); // Populate để lấy thông tin chi tiết của các members
+  
+      // Kiểm tra nếu không có dự án nào được tìm thấy
+      if (!tasks || tasks.length === 0) {
+        return res.status(404).json({ message: "No tasks found for this user." });
+      }
+  
+      // Trả về danh sách dự án
+      return res.status(200).json(tasks);
+    } catch (error) {
+      // Xử lý lỗi và trả về thông báo lỗi
+      console.error("Error fetching tasks by userId:", error);
+      return res.status(500).json({ message: "Failed to fetch task. Please try again later." });
     }
-
-    res.status(200).json(taskList);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
+
+
 
 module.exports = {
   getTaskList,
