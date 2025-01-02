@@ -426,7 +426,7 @@ const getTaskListByUser = async (req, res) => {
 
 module.exports = {
   getTaskList,
-  getTask,m
+  getTask,
   updateTask,
   deleteTask,
   createTask,
