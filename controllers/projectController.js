@@ -20,12 +20,15 @@ const getProjectByUserId = async (req, res) => {
     // Tìm kiếm dự án nơi userId là owner hoặc thuộc danh sách members
     const projects = await Project.find({
       $or: [{ owner: userId }, { members: userId }],
-    }).populate("owner", "name email") // Populate để lấy thông tin chi tiết của owner
+    })
+      .populate("owner", "name email") // Populate để lấy thông tin chi tiết của owner
       .populate("members", "name email"); // Populate để lấy thông tin chi tiết của các members
 
     // Kiểm tra nếu không có dự án nào được tìm thấy
     if (!projects || projects.length === 0) {
-      return res.status(404).json({ message: "No projects found for this user." });
+      return res
+        .status(404)
+        .json({ message: "No projects found for this user." });
     }
 
     // Trả về danh sách dự án
@@ -33,10 +36,11 @@ const getProjectByUserId = async (req, res) => {
   } catch (error) {
     // Xử lý lỗi và trả về thông báo lỗi
     console.error("Error fetching projects by userId:", error);
-    return res.status(500).json({ message: "Failed to fetch projects. Please try again later." });
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch projects. Please try again later." });
   }
 };
-
 
 // Tạo dự án mới
 const createProject = async (req, res) => {
@@ -93,24 +97,24 @@ const deleteProject = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-const getProjectByUserId = async (req, res) => {
-  try {
-    const { id } = req.params;
+// const getProjectByUserId = async (req, res) => {
+//   try {
+//     const { id } = req.params;
 
-    const projects = await Project.find({
-      $or: [{ owner: id }, { members: id }],
-    })
-      .populate("owner", "name email")
-      .populate("members", "name email");
+//     const projects = await Project.find({
+//       $or: [{ owner: id }, { members: id }],
+//     })
+//       .populate("owner", "name email")
+//       .populate("members", "name email");
 
-    if (projects.length === 0) {
-      return res.status(404).json("No project found!");
-    }
-    return res.status(200).json(projects);
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
+//     if (projects.length === 0) {
+//       return res.status(404).json("No project found!");
+//     }
+//     return res.status(200).json(projects);
+//   } catch (error) {
+//     return res.status(500).json({ message: error.message });
+//   }
+// };
 
 module.exports = {
   getProjects,
@@ -118,5 +122,4 @@ module.exports = {
   createProject,
   updateProject,
   deleteProject,
-  getProjectByUserId,
 };
