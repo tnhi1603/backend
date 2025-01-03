@@ -1,170 +1,206 @@
-# Task Management System
+# Project Management Backend
 
-## Overview
+This project provides a backend system for a project management application. It includes user authentication, task management, project management, notifications, and file attachments. The system is built with **Node.js**, **Express.js**, and **MongoDB**.
 
-This project is a backend application for a Task Management System. It allows users to register, log in, and manage tasks within projects. The backend is built using **Node.js** and **Express**, with **MongoDB** as the database.
+## Table of Contents
 
----
+1. [Features](#features)
+2. [Folder Structure](#folder-structure)
+3. [API Documentation](#api-documentation)
+4. [Setup Instructions](#setup-instructions)
+5. [Models](#models)
+6. [Middleware](#middleware)
 
 ## Features
 
-### User Management
+- User authentication (register, login).
+- Manage tasks and projects.
+- Notifications for users.
+- File attachments linked to tasks.
+- User profile updates.
+- Task filtering, sorting, and statistics.
 
-- **Register**: Users can create an account with their name, email, and password.
-- **Login**: Authenticate using email and password to receive a JWT token.
+## Folder Structure
 
-### Task Management
+```
+project-management-backend/
+├── controllers/       # Business logic
+├── models/            # Mongoose schemas
+├── routes/            # API routes
+├── middlewares/       # Custom middleware
+├── config/            # Configuration files
+├── cron/              # Cron jobs for periodic tasks
+├── uploads/           # Storage for uploaded files
+├── app.js             # Entry point
+```
 
-- **Create Task**: Add new tasks to a project.
-- **View Tasks**: Retrieve all tasks or a specific task by ID.
-- **Update Task**: Modify the details of an existing task.
-- **Delete Task**: Remove a task from the system.
-
-### Additional Features
-
-- **Project Management**: Organize tasks under specific projects.
-- **Notifications**: Send and manage user-specific notifications.
-- **File Attachments**: Attach files to tasks for better organization.
-
----
-
-## Technologies Used
-
-### Backend
-
-- **Node.js**: JavaScript runtime environment.
-- **Express.js**: Web framework for building RESTful APIs.
-- **Mongoose**: MongoDB object modeling for Node.js.
-
-### Database
-
-- **MongoDB**: NoSQL database for storing users, tasks, projects, notifications, and attachments.
-
-### Libraries
-
-- **bcryptjs**: Hash passwords for secure storage.
-- **jsonwebtoken**: Generate and validate JWT tokens.
-- **dotenv**: Load environment variables from `.env` file.
-- **cors**: Enable cross-origin requests.
-
----
-
-## Installation
-
-### Prerequisites
-
-- **Node.js** and **npm** installed.
-- MongoDB connection string (e.g., from MongoDB Atlas).
-
-### Steps
-
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd backend
-   ```
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Create a `.env` file in the root directory and add:
-   ```env
-   MONGO_URI=<your-mongo-db-connection-string>
-   JWT_SECRET=<your-jwt-secret>
-   PORT=3001
-   ```
-5. Start the server:
-   ```bash
-   npm start
-   ```
-6. Open your browser and go to `http://localhost:3001`.
-
----
-
-## API Endpoints
+## API Documentation
 
 ### Authentication
 
-- `POST /api/auth/register`:
+#### POST /api/auth/register
 
-  - **Body**: `{ name, email, password }`
-  - **Description**: Register a new user.
+- **Description**: Register a new user.
+- **Body**:
+  ```json
+  {
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "password": "password123"
+  }
+  ```
+- **Response**: 201 Created
 
-- `POST /api/auth/login`:
-  - **Body**: `{ email, password }`
-  - **Description**: Log in and receive a JWT token.
+#### POST /api/auth/login
+
+- **Description**: Log in a user.
+- **Body**:
+  ```json
+  {
+    "email": "johndoe@example.com",
+    "password": "password123"
+  }
+  ```
+- **Response**: 200 OK
 
 ### Task Management
 
-- `GET /api/task/`:
+#### GET /api/task
 
-  - **Description**: Retrieve all tasks.
+- **Description**: Retrieve all tasks.
 
-- `GET /api/task/:id`:
+#### POST /api/task
 
-  - **Params**: `id` (Task ID)
-  - **Description**: Retrieve a specific task by ID.
+- **Description**: Create a new task.
+- **Body**:
+  ```json
+  {
+    "title": "New Task",
+    "description": "Task description",
+    "priority": "High",
+    "project": "projectId",
+    "idUser": "userId"
+  }
+  ```
 
-- `POST /api/task/`:
+### Project Management
 
-  - **Body**: Task details (e.g., title, description, project, etc.)
-  - **Description**: Create a new task.
+#### GET /api/project
 
-- `PUT /api/task/:id`:
+- **Description**: Retrieve all projects.
 
-  - **Params**: `id` (Task ID)
-  - **Body**: Updated task details.
-  - **Description**: Update an existing task.
+#### POST /api/project
 
-- `DELETE /api/task/:id`:
-  - **Params**: `id` (Task ID)
-  - **Description**: Delete a task.
+- **Description**: Create a new project.
+- **Body**:
+  ```json
+  {
+    "name": "New Project",
+    "description": "Project description",
+    "members": ["userId1", "userId2"]
+  }
+  ```
+
+### Notifications
+
+#### GET /api/notification
+
+- **Description**: Retrieve all notifications.
+
+#### POST /api/notification
+
+- **Description**: Create a notification.
+
+### User Management
+
+#### GET /api/user
+
+- **Description**: Retrieve all users.
+
+#### PUT /api/user/:id/update
+
+- **Description**: Update user details.
+
+#### PUT /api/user/:id/changepassword
+
+- **Description**: Change user password.
+
+### Attachments
+
+#### Schema Definition
+
+- **taskId**: ObjectId (reference to Task).
+- **fileUrl**: String (URL of the file).
+- **uploadedBy**: ObjectId (reference to User).
+
+## Setup Instructions
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo-url.git
+   ```
+2. Install dependencies:
+   ```bash
+   cd project-management-backend
+   npm install
+   ```
+3. Configure environment variables:
+   - Create a `.env` file:
+     ```
+     PORT=5000
+     MONGO_URI=your-mongodb-uri
+     JWT_SECRET=your-secret-key
+     ```
+4. Run the server:
+   ```bash
+   npm start
+   ```
+
+## Models
+
+### User
+
+- **Fields**:
+  - `name`: String
+  - `email`: String (unique)
+  - `password`: String
+  - `avatar`: String (optional)
+
+### Task
+
+- **Fields**:
+  - `title`: String
+  - `description`: String
+  - `priority`: Enum (Low, Medium, High)
+  - `status`: Enum (Not Started, In Progress, Completed)
+
+### Project
+
+- **Fields**:
+  - `name`: String
+  - `owner`: ObjectId (reference to User)
+  - `members`: Array of ObjectIds (reference to User)
+
+### Notification
+
+- **Fields**:
+  - `userId`: ObjectId (reference to User)
+  - `content`: String
+  - `isRead`: Boolean
+
+### Attachment
+
+- **Fields**:
+  - `taskId`: ObjectId (reference to Task)
+  - `fileUrl`: String
+  - `uploadedBy`: ObjectId (reference to User)
+
+## Middleware
+
+### Authentication Middleware
+
+- Verifies JWT tokens to authenticate users.
 
 ---
 
-## Project Structure
-
-```
-backend/
-├── config/
-│   └── db.js           # MongoDB connection setup
-├── controllers/
-│   ├── authController.js  # Authentication logic
-│   └── taskController.js  # Task management logic
-├── models/
-│   ├── User.js         # User model
-│   ├── Task.js         # Task model
-│   ├── Project.js      # Project model
-│   ├── Notification.js # Notification model
-│   └── Attachment.js   # Attachment model
-├── routes/
-│   ├── authRoutes.js   # Authentication routes
-│   └── taskRoutes.js   # Task routes
-├── app.js              # Main application file
-├── package.json        # Project metadata and dependencies
-└── .env                # Environment variables
-```
-
----
-
-## Future Improvements
-
-- Role-based access control (e.g., admin, user roles).
-- Advanced project analytics.
-- Integration with frontend frameworks like React or Angular.
-- Real-time updates using WebSocket or Socket.io.
-
----
-
-## Contributing
-
-Feel free to submit issues or pull requests. Contributions are welcome!
-
----
-
-## License
-
-This project is licensed under the MIT License.
+For further assistance, please refer to the source code or contact the development team.
