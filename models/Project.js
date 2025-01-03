@@ -8,6 +8,21 @@ const ProjectSchema = new mongoose.Schema({
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   startDate: Date,
   dueDate: Date,
+  status: {
+    type: String,
+    enum: ["Đang chạy", "Hoàn thành", "Đã đóng"],
+    default: "Đang chạy",
+  },
 });
+// Virtual để populate tasks liên quan đến dự án
+ProjectSchema.virtual("tasks", {
+  ref: "Task", // Model Task
+  localField: "_id", // Trường trong Project
+  foreignField: "project", // Trường trong Task
+});
+
+// Đảm bảo virtuals được bao gồm trong JSON và Object
+ProjectSchema.set("toObject", { virtuals: true });
+ProjectSchema.set("toJSON", { virtuals: true });
 
 module.exports = mongoose.model("Project", ProjectSchema);
