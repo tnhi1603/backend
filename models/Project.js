@@ -10,8 +10,8 @@ const ProjectSchema = new mongoose.Schema({
   dueDate: Date,
   status: {
     type: String,
-    enum: ["Đang chạy", "Hoàn thành", "Đã đóng"],
-    default: "Đang chạy",
+    enum: ["In Progress", "Completed", "Closed"],
+    default: "In Progress",
   },
 });
 // Virtual để populate tasks liên quan đến dự án
