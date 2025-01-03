@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middlewares/authMiddleware");
+
 const {
   getTaskList,
   getTask,
@@ -13,6 +15,7 @@ const {
   findByUserInput,
   getTaskListByUser,
   updateTaskStatus,
+  updateTaskMember,
 } = require("../controllers/taskController");
 
 router.get("/", getTaskList);
@@ -27,5 +30,6 @@ router.put("/:id", updateTask);
 router.delete("/:id", deleteTask);
 router.get("/user/:userId", getTaskListByUser);
 router.patch("/:id/status", updateTaskStatus); // Cập nhật trạng thái task
+router.patch("/:id/members", authMiddleware, updateTaskMember);
 
 module.exports = router;

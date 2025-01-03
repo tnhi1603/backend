@@ -6,9 +6,11 @@ const {
   changePassword,
   changeAvatar,
   upload,
+  getAllUsers,
 } = require("../controllers/userController");
 const router = express.Router();
 
+router.get("/", getAllUsers);
 router.get("/:id", getUser);
 router.put("/:id/update", updateUser);
 router.post("/:id/delete", deleteUser);

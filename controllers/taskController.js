@@ -253,6 +253,14 @@ const getTaskListByStatusFilter = async (req, res) => {
 const createTask = async (req, res) => {
   try {
     const task = await taskModel.create(req.body);
+    if (task.idUser) {
+      Notification.create({
+        userId: task.idUser,
+        content: `Bạn đã được giao một Task mới: ${task.title}`,
+        isRead: false,
+      });
+    }
+
     res.status(200).json(task);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -464,6 +472,32 @@ const updateTaskStatus = async (req, res) => {
   }
 };
 
+const updateTaskMember = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { idUser } = req.body; // User ID của thành viên mới
+
+    const task = await taskModel.findById(id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    task.idUser = idUser;
+    await task.save();
+
+    // Tạo thông báo cho thành viên mới
+    Notification.create({
+      userId: idUser,
+      content: `Bạn đã được giao một Task mới: ${task.title}`,
+      isRead: false,
+    });
+
+    res.status(200).json(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getTaskList,
   getTask,
@@ -477,4 +511,5 @@ module.exports = {
   findByUserInput,
   getTaskListByUser,
   updateTaskStatus,
+  updateTaskMember,
 };
