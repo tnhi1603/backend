@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middlewares/authMiddleware.js");
+
 const {
   getAllNotifications,
   getNotificationsByUser,
@@ -9,6 +11,7 @@ const {
   markMultipleNotificationsAsRead,
   createNotification,
   deleteNotification,
+  getUnreadNotificationCount,
 } = require("../controllers/notiController");
 
 const checkUserId = require("../middlewares/checkUserId");
@@ -34,5 +37,6 @@ router.post("/", createNotification);
 
 // Xóa thông báo
 router.delete("/:id", deleteNotification);
+router.get("/unread/count", authMiddleware, getUnreadNotificationCount);
 
 module.exports = router;

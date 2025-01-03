@@ -199,6 +199,16 @@ const createNotification = async (req, res) => {
   }
 };
 
+const getUnreadNotificationCount = async (req, res) => {
+  try {
+    const userId = req.user.id; // Lấy userId từ middleware xác thực
+    const count = await Notification.countDocuments({ userId, isRead: false });
+    res.status(200).json({ count });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllNotifications,
   getNotificationsByUser,
@@ -208,4 +218,5 @@ module.exports = {
   markMultipleNotificationsAsRead,
   deleteNotification,
   createNotification,
+  getUnreadNotificationCount,
 };

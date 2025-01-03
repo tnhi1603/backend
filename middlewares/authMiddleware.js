@@ -23,6 +23,7 @@ const authMiddleware = (req, res, next) => {
 
     // Gán userId và các thông tin khác từ payload vào req để sử dụng trong controller
     req.user = decoded;
+    console.log(req.user);
 
     next();
   } catch (error) {
