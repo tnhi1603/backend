@@ -498,6 +498,45 @@ const updateTaskMember = async (req, res) => {
   }
 };
 
+const getUserTaskStatistics = async (req, res) => {
+  try {
+    // Lấy idUser từ body hoặc từ middleware
+    const idUser = req.body.idUser || req.user?.id;
+
+    // Kiểm tra idUser có hợp lệ không
+    if (!idUser || !mongoose.Types.ObjectId.isValid(idUser)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    // Truy vấn danh sách task theo idUser
+    const tasks = await taskModel.find({ idUser: idUser });
+
+    // Tính toán thống kê
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(
+      (task) => task.status === "Completed"
+    ).length;
+    const inProgressTasks = tasks.filter(
+      (task) => task.status === "In Progress"
+    ).length;
+    const notStartedTasks = tasks.filter(
+      (task) => task.status === "Not Started"
+    ).length;
+
+    // Trả về kết quả
+    res.status(200).json({
+      totalTasks,
+      completedTasks,
+      inProgressTasks,
+      notStartedTasks,
+      progress: totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100,
+    });
+  } catch (error) {
+    console.error("Error in getUserTaskStatistics:", error);
+    res.status(500).json({ message: "Failed to fetch task statistics" });
+  }
+};
+
 module.exports = {
   getTaskList,
   getTask,
@@ -512,4 +551,5 @@ module.exports = {
   getTaskListByUser,
   updateTaskStatus,
   updateTaskMember,
+  getUserTaskStatistics,
 };

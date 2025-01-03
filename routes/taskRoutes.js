@@ -16,6 +16,7 @@ const {
   getTaskListByUser,
   updateTaskStatus,
   updateTaskMember,
+  getUserTaskStatistics,
 } = require("../controllers/taskController");
 
 router.get("/", getTaskList);
@@ -24,6 +25,7 @@ router.get("/sort/status", getTaskListByStatusSort);
 router.get("/filter/priority", getTaskListByPriorityFilter);
 router.get("/filter/status", getTaskListByStatusFilter);
 router.get("/find", findByUserInput);
+router.get("/statistics", authMiddleware, getUserTaskStatistics);
 router.get("/:id", getTask);
 router.post("/", createTask);
 router.put("/:id", updateTask);
