@@ -1,3 +1,4 @@
+// Import các module cần thiết
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -31,12 +32,14 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
     });
+    // Phản hồi khi đăng ký thành công
     res.status(201).json({
       success: true,
       message: "User registered successfully",
       data: { id: newUser._id, name: newUser.name, email: newUser.email },
     });
   } catch (error) {
+    // Xử lý lỗi server
     res
       .status(500)
       .json({ success: false, message: "Server error", error: error.message });
@@ -77,7 +80,7 @@ const login = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-
+    // Phản hồi khi đăng nhập thành công
     res.status(200).json({
       success: true,
       message: "Login successful",
@@ -87,10 +90,11 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
+    // Xử lý lỗi server
     res
       .status(500)
       .json({ success: false, message: "Server error", error: error.message });
   }
 };
-
+// Xuất các hàm để sử dụng ở nơi khác
 module.exports = { register, login };

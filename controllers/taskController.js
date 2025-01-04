@@ -3,11 +3,13 @@ const taskModel = require("../models/Task");
 const projectModel = require("../models/Project");
 const Notification = require("../models/Notification");
 
+// Lấy danh sách công việc với thông tin người được giao và thông tin dự án
 const getTaskList = async (req, res) => {
   try {
     const taskList = await taskModel.aggregate([
       // Lookup từ "users" để lấy thông tin assigned_users
       {
+        // Kết hợp thông tin người dùng được giao công việc từ collection "users"
         $lookup: {
           from: "users",
           localField: "idUser",
@@ -16,6 +18,7 @@ const getTaskList = async (req, res) => {
         },
       },
       {
+        // Lấy phần tử đầu tiên từ mảng "assigned_users"
         $addFields: {
           assigned_users: {
             $arrayElemAt: ["$assigned_users", 0], // Lấy phần tử đầu tiên của mảng
@@ -51,7 +54,7 @@ const getTaskList = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
+// Lấy thông tin công việc chi tiết
 const getTask = async (req, res) => {
   try {
     const { id } = req.params;
@@ -116,6 +119,7 @@ const getTask = async (req, res) => {
   }
 };
 
+// Sắp xếp danh sách công việc theo mức độ ưu tiên
 // http://localhost:5001/api/task/sort?value=1
 const getTaskListByPrioritySort = async (req, res) => {
   try {
@@ -150,6 +154,7 @@ const getTaskListByPrioritySort = async (req, res) => {
   }
 };
 
+// Sắp xếp danh sách công việc theo trạng thái
 const getTaskListByStatusSort = async (req, res) => {
   try {
     const { value } = req.query;
@@ -183,6 +188,7 @@ const getTaskListByStatusSort = async (req, res) => {
   }
 };
 
+// Lọc danh sách công việc theo mức độ ưu tiên
 // http://localhost:5001/api/task/filter?value=High
 const getTaskListByPriorityFilter = async (req, res) => {
   try {
@@ -217,6 +223,7 @@ const getTaskListByPriorityFilter = async (req, res) => {
   }
 };
 
+// Lọc danh sách công việc theo trạng thái
 const getTaskListByStatusFilter = async (req, res) => {
   try {
     const { value } = req.query;
@@ -250,6 +257,7 @@ const getTaskListByStatusFilter = async (req, res) => {
   }
 };
 
+// Tạo công việc mới và gửi thông báo
 const createTask = async (req, res) => {
   try {
     const task = await taskModel.create(req.body);
@@ -267,6 +275,7 @@ const createTask = async (req, res) => {
   }
 };
 
+// Cập nhật công việc
 const updateTask = async (req, res) => {
   try {
     const { id } = req.params;
@@ -281,6 +290,7 @@ const updateTask = async (req, res) => {
   }
 };
 
+// Xóa công việc
 const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
@@ -294,6 +304,7 @@ const deleteTask = async (req, res) => {
   }
 };
 
+// Tìm công việc và dự án theo input của người dùng
 // input pattern-matching with title or description
 const getTaskByUserInput = async (value) => {
   const task = await taskModel.aggregate([
@@ -379,6 +390,7 @@ const findByUserInput = async (req, res) => {
   }
 };
 
+// Lấy danh sách công việc của người dùng cụ thể
 const getTaskListByUser = async (req, res) => {
   try {
     const { userId } = req.params; // Lấy userId từ tham số URL
@@ -472,6 +484,7 @@ const updateTaskStatus = async (req, res) => {
   }
 };
 
+// Cập nhật thành viên cho công việc
 const updateTaskMember = async (req, res) => {
   try {
     const { id } = req.params;
@@ -498,6 +511,7 @@ const updateTaskMember = async (req, res) => {
   }
 };
 
+// Lấy thống kê về công việc của người dùng
 const getUserTaskStatistics = async (req, res) => {
   try {
     // Lấy idUser từ body hoặc từ middleware
