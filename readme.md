@@ -2,6 +2,20 @@
 
 This project provides a backend system for a project management application. It includes user authentication, task management, project management, notifications, and file attachments. The system is built with **Node.js**, **Express.js**, and **MongoDB**.
 
+## Course Details
+
+- **Course**: SE347.P12 - Công nghệ Web và ứng dụng
+- **Instructor**: Nguyễn Tấn Toàn
+- **Institution**: University of Information Technology (UIT), Ho Chi Minh City
+
+## Group Members
+
+- **19522283**: Nguyễn Ngọc Thịnh
+- **21522679**: Trần Trung Tín
+- **21521236**: Trần Thảo Nhi
+- **20521353**: Nguyễn Văn Hoành
+- **20521875**: Nguyễn Duy Tân
+
 ## Table of Contents
 
 1. [Features](#features)
